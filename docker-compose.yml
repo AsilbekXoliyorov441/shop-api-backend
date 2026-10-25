@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shop}
+      POSTGRES_DB: shop
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shop -d shop"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://shop:${POSTGRES_PASSWORD:-shop}@db:5432/shop
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET .env faylida berilishi kerak}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:3000}
+      ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-15m}
+      REFRESH_TOKEN_DAYS: ${REFRESH_TOKEN_DAYS:-30}
+      RATE_LIMIT: ${RATE_LIMIT:-600}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+    ports:
+      # Caddy ishlatilsa BIND=127.0.0.1 qiling: API tashqariga faqat HTTPS orqali ochiladi
+      - "${BIND:-0.0.0.0}:${PORT:-3000}:3000"
+    volumes:
+      - uploads:/app/uploads
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # HTTPS (Let's Encrypt sertifikati avtomatik). Yoqish: docker compose --profile https up -d
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["https"]
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  db_data:
+  uploads:
+  caddy_data:
+  caddy_config:

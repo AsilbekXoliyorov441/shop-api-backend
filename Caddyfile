@@ -1,0 +1,5 @@
+# DOMAIN .env dan olinadi. WebSocket (Socket.IO) Upgrade sarlavhalarini Caddy o'zi o'tkazadi
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy api:3000
+}

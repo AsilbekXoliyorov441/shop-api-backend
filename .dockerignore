@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+uploads
+.git
+*.tsbuildinfo
+README.md
+Caddyfile
+docker-compose.yml
