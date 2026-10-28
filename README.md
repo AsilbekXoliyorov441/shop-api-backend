@@ -124,3 +124,4 @@ Barchasi `.env.example` da izohlari bilan. Muhimlari:
 
 - `ACCESS_TOKEN_TTL` (standart `15m`): refresh oqimini darsda ko'rsatish uchun vaqtincha `1m` qilish mumkin.
 - `RATE_LIMIT` (standart 600): bitta IP uchun daqiqasiga so'rovlar. Butun sinf bitta Wi-Fi ortida bo'lsa, hammasi bitta IP hisoblanadi.
+# shop-api-backend
